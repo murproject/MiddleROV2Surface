@@ -80,7 +80,7 @@ int8_t getManipulator() {
 
 void setup() {
     Serial.begin(115200);
-    Serial3.begin(115200);
+    Serial1.begin(115200);
 
     pinMode(RS485_CONTROL_PIN, OUTPUT);
     digitalWrite(RS485_CONTROL_PIN, HIGH);
@@ -105,11 +105,12 @@ void loop() {
     buffer[4] = getCamera();
     buffer[5] = getManipulator();
     buffer[6] = END_BYTE;
-    Serial3.write(buffer, 7);
-    Serial.print((int8_t)buffer[1]); Serial.print(" ");
-    Serial.print((int8_t)buffer[2]); Serial.print(" ");
-    Serial.print((int8_t)buffer[3]); Serial.print(" ");
-    Serial.print((int8_t)buffer[4]); Serial.print(" ");
+    Serial1.write(buffer, 7);
+    Serial.print("\t");
+    Serial.print((int8_t)buffer[1]); Serial.print("\t");
+    Serial.print((int8_t)buffer[2]); Serial.print("\t");
+    Serial.print((int8_t)buffer[3]); Serial.print("\t");
+    Serial.print((int8_t)buffer[4]); Serial.print("\t");
     Serial.println((int8_t)buffer[5]);
     delay(50);
 }
