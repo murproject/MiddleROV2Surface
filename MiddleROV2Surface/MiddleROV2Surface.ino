@@ -37,7 +37,7 @@ int8_t getRightPower(int y, int x) {
 }
 
 int8_t getVerticalPower(int z) {
-    return constrain(z, -MAX_POWER, MAX_POWER)*-1;
+    return -constrain(z, -MAX_POWER, MAX_POWER);
 }
 
 int8_t checkBtn(uint16_t btn1, uint16_t btn2) {
@@ -52,12 +52,23 @@ int8_t checkBtn(uint16_t btn1, uint16_t btn2) {
 
 int8_t getCamera() {
     int speed = 1;
-    return checkBtn(buttonR1, buttonR2) * speed;
+    return checkBtn(buttonR1, buttonR2) * -speed;
 }
 
 int8_t getManipulator() {
     int speed = 1;
     return checkBtn(buttonL1, buttonL2) * speed;
+}
+
+int8_t getSpeedDivider() {
+    int multiplier = checkBtn(buttonSquare, buttonCircle);
+    if (multiplier == 0) {
+        return 2;
+    } else if (multiplier == 1) {
+        return 4;
+    } else if (multiplier == -1) {
+        return 1;
+    }
 }
 
 void setup() {
@@ -96,9 +107,9 @@ void loop() {
 
     uint8_t buffer[7];
     buffer[0] = START_BYTE;
-    buffer[1] = getLeftPower(y, x);
-    buffer[2] = getRightPower(y, x);
-    buffer[3] = getVerticalPower(z);
+    buffer[1] = getLeftPower(y, x) / getSpeedDivider();
+    buffer[2] = getRightPower(y, x) / getSpeedDivider();
+    buffer[3] = getVerticalPower(z) / getSpeedDivider();
     buffer[4] = getCamera();
     buffer[5] = getManipulator();
     buffer[6] = END_BYTE;
