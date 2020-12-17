@@ -6,7 +6,7 @@
 
 #include "GamepadUtils.h"
 
-#define DEBUG
+// #define DEBUG
 
 #define RS485_CONTROL_PIN 2
 #define START_BYTE 0xFE
@@ -126,6 +126,7 @@ void loop() {
     Serial.print((int8_t)buffer[3]); Serial.print("\t");
     Serial.print((int8_t)buffer[4]); Serial.print("\t");
     Serial.print((int8_t)buffer[5]); Serial.print("\t");
-    Serial.println((int8_t)buffer[6]);
+    Serial.print((int8_t)buffer[6]); Serial.print("\t");
+    Serial.print(" / "); Serial.println(getSpeedDivider());
     delay(50);
 }
