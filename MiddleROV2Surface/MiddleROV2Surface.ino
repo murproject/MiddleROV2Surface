@@ -81,6 +81,11 @@ void setup() {
     Serial.println(F("Starting MiddleROV…"));
 }
 
+int8_t getButton1() {
+	int speed = 1;
+	return checkBtn(buttonTriangle, buttonCross) * speed;
+}
+
 void loop() {
     readGamepad();
 
@@ -105,20 +110,22 @@ void loop() {
     Serial.println("");
 #endif
 
-    uint8_t buffer[7];
+    uint8_t buffer[8];
     buffer[0] = START_BYTE;
     buffer[1] = getLeftPower(y, x) / getSpeedDivider();
     buffer[2] = getRightPower(y, x) / getSpeedDivider();
     buffer[3] = getVerticalPower(z) / getSpeedDivider();
     buffer[4] = getCamera();
     buffer[5] = getManipulator();
-    buffer[6] = END_BYTE;
-    Serial1.write(buffer, 7);
+    buffer[6] = getButton1();
+    buffer[7] = END_BYTE;
+    Serial1.write(buffer, 8);
     Serial.print("\t");
     Serial.print((int8_t)buffer[1]); Serial.print("\t");
     Serial.print((int8_t)buffer[2]); Serial.print("\t");
     Serial.print((int8_t)buffer[3]); Serial.print("\t");
     Serial.print((int8_t)buffer[4]); Serial.print("\t");
-    Serial.println((int8_t)buffer[5]);
+    Serial.print((int8_t)buffer[5]); Serial.print("\t");
+    Serial.println((int8_t)buffer[6]);
     delay(50);
 }
