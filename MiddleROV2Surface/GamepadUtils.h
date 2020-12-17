@@ -1,5 +1,4 @@
-#ifndef GAMEPAD_UTILS
-#define GAMEPAD_UTILS
+#pragma once
 
 #include <Arduino.h>
 
@@ -34,5 +33,3 @@ void printButtons();
 
 bool getButtonState(uint16_t index);
 byte getStickState(uint16_t index);
-
-#endif // GAMEPAD_UTILS
