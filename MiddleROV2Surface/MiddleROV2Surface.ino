@@ -4,43 +4,25 @@
  Author:	Zinkov
 */
 
-// the setup function runs once when you press reset or power the board
-#include "PS2X_lib.h"
-
-#define PS2_DAT        13  //14
-#define PS2_CMD        11  //15
-#define PS2_SEL        10  //16
-#define PS2_CLK        12  //17
-
-//#define pressures   true
-#define pressures   false
-//#define rumble      true
-#define rumble      false
-
-#define RS485_CONTROL_PIN 2
-
-#define START_BYTE 0xFE
-#define END_BYTE 0xEF
+#include "GamepadUtils.h"
 
 #define DEBUG
 
-PS2X ps2x;
+#define RS485_CONTROL_PIN 2
+#define START_BYTE 0xFE
+#define END_BYTE 0xEF
 
-int error = 0;
-byte type = 0;
-byte vibrate = 0;
+constexpr int MAX_POWER = 100;
 
 int treshold(int v, int b) {
     if (abs(v) < b) return 0;
     return v;
 }
 
-constexpr int MAX_POWER = 100;
-
 int filterAxis(byte axis) {
-    int an = ps2x.Analog(axis);
+    int an = getStickState(axis);
     an -= 127;
-    an = treshold(an, 2) * -1;
+    an = treshold(an, 10) * -1;
     an = constrain(an, -127, 127);
     int val = map(an, -127, 127, -MAX_POWER, MAX_POWER);
     return val;
@@ -59,10 +41,10 @@ int8_t getVerticalPower(int z) {
 }
 
 int8_t checkBtn(uint16_t btn1, uint16_t btn2) {
-    if (ps2x.Button(btn1)) {
+    if (getButtonState(btn1)) {
         return 1;
     }
-    if (ps2x.Button(btn2)) {
+    if (getButtonState(btn2)) {
         return -1;
     }
     return 0;
@@ -70,32 +52,47 @@ int8_t checkBtn(uint16_t btn1, uint16_t btn2) {
 
 int8_t getCamera() {
     int speed = 1;
-    return checkBtn(PSB_R1, PSB_R2) * speed;
+    return checkBtn(buttonR1, buttonR2) * speed;
 }
 
 int8_t getManipulator() {
     int speed = 1;
-    return checkBtn(PSB_L1, PSB_L2) * speed;
+    return checkBtn(buttonL1, buttonL2) * speed;
 }
 
 void setup() {
-    Serial.begin(115200);
-    Serial1.begin(115200);
+    Serial.begin(115200);   // control serial port (to ROV)
+    Serial1.begin(115200);  // debug serial port (to PC)
 
     pinMode(RS485_CONTROL_PIN, OUTPUT);
     digitalWrite(RS485_CONTROL_PIN, HIGH);
 
-    error = ps2x.config_gamepad(PS2_CLK, PS2_CMD, PS2_SEL, PS2_DAT, pressures, rumble);
-    type = ps2x.readType();
-
+    Serial.println(F("Starting MiddleROV…"));
 }
 
 void loop() {
-    ps2x.read_gamepad(false, vibrate);
+    readGamepad();
+
     int y, x, z = 0;
-    y = filterAxis(PSS_LY);
-    x = filterAxis(PSS_LX);
-    z = filterAxis(PSS_RY);
+    y = filterAxis(stickLY);
+    x = filterAxis(stickLX);
+    z = filterAxis(stickRY);
+
+#ifdef DEBUG
+    printButtons();
+
+    Serial.print("\t");
+    Serial.print(getStickState(stickLY)); Serial.print("\t");
+    Serial.print(getStickState(stickLX)); Serial.print("\t");
+    Serial.print(getStickState(stickRY)); Serial.print("\t");
+    Serial.println("");
+
+    Serial.print("\t");
+    Serial.print(y); Serial.print("\t");
+    Serial.print(x); Serial.print("\t");
+    Serial.print(z); Serial.print("\t");
+    Serial.println("");
+#endif
 
     uint8_t buffer[7];
     buffer[0] = START_BYTE;
