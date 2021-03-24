@@ -6,7 +6,7 @@
 
 #include "GamepadUtils.h"
 
-// #define DEBUG
+#define DEBUG
 
 #define RS485_CONTROL_PIN 2
 #define START_BYTE 0xFE
