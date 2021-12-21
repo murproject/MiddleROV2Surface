@@ -1,4 +1,5 @@
 #include "GamepadUtils.h"
+
 #include <PsxControllerBitBang.h>
 
 const byte PIN_PS2_ATT = 10;
@@ -8,7 +9,7 @@ const byte PIN_PS2_CLK = 12;
 
 bool haveController = false;
 byte stickState[4];
-bool buttonState[PSX_BUTTONS_NO];
+bool buttonState[PSX_BUTTONS_NO + 1];
 
 PsxControllerBitBang<PIN_PS2_ATT, PIN_PS2_CMD, PIN_PS2_DAT, PIN_PS2_CLK> psx;
 
@@ -42,7 +43,7 @@ void dumpSticks() {
 
 void dumpButtons(PsxButtons psxButtons) {
     static PsxButtons lastB = 0;
-	if (psxButtons == lastB) return;
+	  if (psxButtons == lastB) return;
 
     lastB = psxButtons;
     clearButtonState();

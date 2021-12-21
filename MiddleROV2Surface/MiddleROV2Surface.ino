@@ -1,12 +1,10 @@
-/*
- Name:		MiddleROV2Surface.ino
- Created:	06.12.2018 17:37:33
- Author:	Zinkov
-*/
-
 #include "GamepadUtils.h"
 
-#define DEBUG
+#define SERIAL_DEBUG    Serial          // USB Serial port (to PC)
+#define SERIAL_CONTROL  Serial1         // Arduino Leonardo
+// #define SERIAL_CONTROL  Serial3      // Arudino MEGA
+
+//#define DEBUG_OUTPUT
 
 #define RS485_CONTROL_PIN 2
 #define START_BYTE 0xFE
@@ -72,16 +70,16 @@ int8_t getSpeedDivider() {
 }
 
 void setup() {
-    Serial.begin(115200);   // control serial port (to ROV)
-    Serial1.begin(115200);  // debug serial port (to PC)
+    SERIAL_CONTROL.begin(115200);  // control serial port (to ROV)
+    SERIAL_DEBUG.begin(115200);   // debug serial port (to PC)
 
     pinMode(RS485_CONTROL_PIN, OUTPUT);
     digitalWrite(RS485_CONTROL_PIN, HIGH);
 
-    Serial.println(F("Starting MiddleROV…"));
+    SERIAL_DEBUG.println(F("Starting MiddleROV…"));
 }
 
-int8_t getButton1() {
+int8_t getMotorButton() {
 	int speed = 1;
 	return checkBtn(buttonTriangle, buttonCross) * speed;
 }
@@ -94,20 +92,20 @@ void loop() {
     x = filterAxis(stickLX);
     z = filterAxis(stickRY);
 
-#ifdef DEBUG
+#ifdef DEBUG_OUTPUT
     printButtons();
 
-    Serial.print("\t");
-    Serial.print(getStickState(stickLY)); Serial.print("\t");
-    Serial.print(getStickState(stickLX)); Serial.print("\t");
-    Serial.print(getStickState(stickRY)); Serial.print("\t");
-    Serial.println("");
+    SERIAL_DEBUG.print("\t");
+    SERIAL_DEBUG.print(getStickState(stickLY)); SERIAL_DEBUG.print("\t");
+    SERIAL_DEBUG.print(getStickState(stickLX)); SERIAL_DEBUG.print("\t");
+    SERIAL_DEBUG.print(getStickState(stickRY)); SERIAL_DEBUG.print("\t");
+    SERIAL_DEBUG.println("");
 
-    Serial.print("\t");
-    Serial.print(y); Serial.print("\t");
-    Serial.print(x); Serial.print("\t");
-    Serial.print(z); Serial.print("\t");
-    Serial.println("");
+    SERIAL_DEBUG.print("\t");
+    SERIAL_DEBUG.print(y); SERIAL_DEBUG.print("\t");
+    SERIAL_DEBUG.print(x); SERIAL_DEBUG.print("\t");
+    SERIAL_DEBUG.print(z); SERIAL_DEBUG.print("\t");
+    SERIAL_DEBUG.println("");
 #endif
 
     uint8_t buffer[8];
@@ -117,16 +115,19 @@ void loop() {
     buffer[3] = getVerticalPower(z) / getSpeedDivider();
     buffer[4] = getCamera();
     buffer[5] = getManipulator();
-    buffer[6] = getButton1();
+    buffer[6] = getMotorButton();
     buffer[7] = END_BYTE;
-    Serial1.write(buffer, 8);
-    Serial.print("\t");
-    Serial.print((int8_t)buffer[1]); Serial.print("\t");
-    Serial.print((int8_t)buffer[2]); Serial.print("\t");
-    Serial.print((int8_t)buffer[3]); Serial.print("\t");
-    Serial.print((int8_t)buffer[4]); Serial.print("\t");
-    Serial.print((int8_t)buffer[5]); Serial.print("\t");
-    Serial.print((int8_t)buffer[6]); Serial.print("\t");
-    Serial.print(" / "); Serial.println(getSpeedDivider());
+
+    SERIAL_CONTROL.write(buffer, 8);
+
+    SERIAL_DEBUG.print("\t");
+    SERIAL_DEBUG.print((int8_t)buffer[1]); SERIAL_DEBUG.print("\t");
+    SERIAL_DEBUG.print((int8_t)buffer[2]); SERIAL_DEBUG.print("\t");
+    SERIAL_DEBUG.print((int8_t)buffer[3]); SERIAL_DEBUG.print("\t");
+    SERIAL_DEBUG.print((int8_t)buffer[4]); SERIAL_DEBUG.print("\t");
+    SERIAL_DEBUG.print((int8_t)buffer[5]); SERIAL_DEBUG.print("\t");
+    SERIAL_DEBUG.print((int8_t)buffer[6]); SERIAL_DEBUG.print("\t");
+    SERIAL_DEBUG.print(" / "); SERIAL_DEBUG.println(getSpeedDivider());
+
     delay(50);
 }
