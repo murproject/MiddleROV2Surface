@@ -2,10 +2,10 @@
 
 #include <PsxControllerBitBang.h>
 
-const byte PIN_PS2_ATT = 10;
-const byte PIN_PS2_CMD = 11;
-const byte PIN_PS2_DAT = 13;
-const byte PIN_PS2_CLK = 12;
+const byte PIN_PS2_ATT = 9;
+const byte PIN_PS2_CMD = 6;
+const byte PIN_PS2_DAT = 12;
+const byte PIN_PS2_CLK = 10;
 
 bool haveController = false;
 byte stickState[4];
