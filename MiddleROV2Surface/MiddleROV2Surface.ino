@@ -1,4 +1,5 @@
 #include "GamepadUtils.h"
+#include "MovingAverage.h"
 
 #define SERIAL_DEBUG    Serial          // USB Serial port (to PC)
 #define SERIAL_CONTROL  Serial1         // Arduino Leonardo
@@ -9,6 +10,11 @@
 #define RS485_CONTROL_PIN 2
 #define START_BYTE 0xFE
 #define END_BYTE 0xEF
+
+const int SAMPLES = 10;
+MovingAverage<int, SAMPLES> left;
+MovingAverage<int, SAMPLES> right;
+MovingAverage<int, SAMPLES> vertical;
 
 constexpr int MAX_POWER = 100;
 
@@ -27,15 +33,21 @@ int filterAxis(byte axis) {
 }
 
 int8_t getLeftPower(int y, int x) {
-    return constrain(y - x, -MAX_POWER, MAX_POWER);
+    int8_t power = constrain(y - x, -MAX_POWER, MAX_POWER);
+    left.add(power / getSpeedDivider());
+    return left.get();
 }
 
 int8_t getRightPower(int y, int x) {
-    return constrain(y + x, -MAX_POWER, MAX_POWER);
+    int8_t power = constrain(y + x, -MAX_POWER, MAX_POWER);
+    right.add(power / getSpeedDivider());
+    return right.get();
 }
 
 int8_t getVerticalPower(int z) {
-    return -constrain(z, -MAX_POWER, MAX_POWER);
+    int8_t power = -constrain(z, -MAX_POWER, MAX_POWER);
+    vertical.add(power / getSpeedDivider());
+    return vertical.get();
 }
 
 int8_t checkBtn(uint16_t btn1, uint16_t btn2) {
@@ -110,9 +122,9 @@ void loop() {
 
     uint8_t buffer[8];
     buffer[0] = START_BYTE;
-    buffer[1] = getLeftPower(y, x) / getSpeedDivider();
-    buffer[2] = getRightPower(y, x) / getSpeedDivider();
-    buffer[3] = getVerticalPower(z) / getSpeedDivider();
+    buffer[1] = getLeftPower(y, x);
+    buffer[2] = getRightPower(y, x);
+    buffer[3] = getVerticalPower(z);
     buffer[4] = getCamera();
     buffer[5] = getManipulator();
     buffer[6] = getMotorButton();
