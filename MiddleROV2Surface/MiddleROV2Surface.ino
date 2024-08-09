@@ -45,7 +45,7 @@ int8_t getRightPower(int y, int x) {
 }
 
 int8_t getVerticalPower(int z) {
-    int8_t power = -constrain(z, -MAX_POWER, MAX_POWER);
+    int8_t power = constrain(z, -MAX_POWER, MAX_POWER);
     vertical.add(power / getSpeedDivider());
     return vertical.get();
 }
@@ -141,5 +141,5 @@ void loop() {
     SERIAL_DEBUG.print((int8_t)buffer[6]); SERIAL_DEBUG.print("\t");
     SERIAL_DEBUG.print(" / "); SERIAL_DEBUG.println(getSpeedDivider());
 
-    delay(50);
+    delay(10);
 }
